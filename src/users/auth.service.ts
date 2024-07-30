@@ -6,18 +6,21 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { log } from 'console';
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
 
   private saltRounds = 10;
 
   async signin(signInDto: SignInDto) {
-    const [user] = await this.usersService.find(signInDto.email);
-    log(user);
+    const user = await this.usersService.findOne(signInDto.id);
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -27,7 +30,10 @@ export class AuthService {
     if (!isMatch) {
       throw new BadRequestException('Password/Email is wrong');
     }
-    return user;
+
+    const token = await this.jwtService.signAsync(signInDto);
+
+    return { access_token: token };
   }
 
   async signup(signUpDto: SignUpDto) {
