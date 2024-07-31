@@ -33,9 +33,7 @@ services:
     depends_on:
       - db
     volumes:
-      - .:/app
-      - /app/node_modules
-    command: sh -c "npm install && npm run start:dev"
+      - ./src:/usr/src/app/src
 
 volumes:
   mysql-data:
